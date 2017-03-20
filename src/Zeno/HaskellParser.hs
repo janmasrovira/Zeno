@@ -17,6 +17,7 @@ import qualified Data.Set as Set
 import System.Directory
 import Outputable ( Outputable, ppr, defaultUserStyle, showPpr )
 
+import qualified Pair as Pair
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified GHC.Paths as Paths
@@ -128,6 +129,7 @@ simplifyModule guts = do
     { Hs.cm_module = Hs.cg_module cg,
       Hs.cm_types = Hs.md_types md,
       -- Hs.cm_imports = Hs.cg_dir_imps cg,
+      Hs.cm_safe = Hs.mg_safe_haskell simpl_guts,
       Hs.cm_binds = Hs.cg_binds cg }
 
 loadModule :: Hs.CoreModule -> HsZeno ()
@@ -448,7 +450,7 @@ convertExpr (Hs.Cast rhs coer) = do
       _ ->
         return rhs'
   where
-  (coer_l, coer_r) = Hs.coercionKind coer
+  (coer_l, coer_r) = Pair.unPair $ Hs.coercionKind coer
 convertExpr (Hs.Type _) = error
   $ "Tried parsing a Type from the GHC core syntax. These should have been removed"
   ++ " beforehand so this is a bug in Zeno."
