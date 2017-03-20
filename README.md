@@ -1,2 +1,2 @@
 # Zeno
-Unofficial Zeno clone. Updated to work with new Haskell.
+Unofficial Zeno fork. Updated to work with current GHC. For now, I have changed it minimally just to make it run. But I might update it later.
