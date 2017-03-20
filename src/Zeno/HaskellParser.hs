@@ -47,10 +47,10 @@ type HsBinding = (Hs.Var, HsExpr)
 type HsBindings = Hs.Bind Hs.Var
 
 instance Eq Hs.Type where
-  (==) = Hs.tcEqType
+  (==) = Hs.eqType
 
 instance Ord Hs.Type where
-  compare = Hs.tcCmpType
+  compare = Hs.cmpType
 
 instance WithinTraversable (Hs.Expr a) (Hs.Expr a) where
   mapWithinM f (Hs.App x y) =
