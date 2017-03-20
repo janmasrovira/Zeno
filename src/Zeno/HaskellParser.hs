@@ -46,8 +46,8 @@ type HsExpr = Hs.Expr Hs.Var
 type HsBinding = (Hs.Var, HsExpr)
 type HsBindings = Hs.Bind Hs.Var
 
-instance Eq Hs.Type where
-  (==) = Hs.eqType
+-- instance Eq Hs.Type where
+--   (==) = Hs.eqType
 
 instance Ord Hs.Type where
   compare = Hs.cmpType
