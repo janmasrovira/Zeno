@@ -61,12 +61,15 @@ instance Ord Nat where
   Succ x <= Succ y = x <= y
 
   max Zero y = y
-  max x Zero = x
+  -- TODO: On swapping next two lines, zeno starts producing error -
+  -- zeno: Zeno representation for variable not found: void#
+  -- Same happens for min, take, drop. Investigate further.
   max (Succ x) (Succ y) = Succ (max x y)
+  max x Zero = x
 
   min Zero y = Zero
-  min x Zero = Zero
   min (Succ x) (Succ y) = Succ (min x y)
+  min x Zero = Zero
 
 instance Num Nat where
   Zero + y = y
@@ -121,13 +124,13 @@ filter p (x:xs)
 
 take :: Nat -> [a] -> [a]
 take Zero _ = []
-take _ [] = []
 take (Succ x) (y:ys) = y : (take x ys)
+take _ [] = []
 
 drop :: Nat -> [a] -> [a]
 drop Zero xs = xs
-drop _ [] = []
 drop (Succ x) (_:xs) = drop x xs
+drop _ [] = []
 
 count :: Nat -> [Nat] -> Nat
 count x [] = Zero
