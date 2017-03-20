@@ -18,7 +18,7 @@ data Proof a
              proofGoal :: !(Clause a),
              proofHypotheses :: ![Hypothesis a] }
   deriving ( Eq, Functor, Foldable, Traversable )
- 
+
 data ProofStep a
   = Eql
   | Con
@@ -31,7 +31,7 @@ data ProofStep a
   | Hcn !(Hypothesis a) !(Proof a)
   | Icn !(Equality a) !(Proof a) !(Proof a)
   deriving ( Eq, Functor, Foldable, Traversable )
-  
+
 data ProofSet a
   = ProofSet  { proofsetProgram :: !(Program a),
                 proofsetProofs :: ![(String, Proof a)] }
@@ -49,48 +49,47 @@ showProof (Proof step cls@(Clause (eq_l :=: eq_r) _) _) = do
   showStep :: ProofStep a -> Indented String
   showStep Eql = return "[eql]"
   showStep Con = return "[con]"
-  
+
   showStep (Sim proof) = do
     prf <- showProof proof
-    return $ 
+    return $
       "[sim]" ++ prf
-  
+
   showStep (Fac proofs) =
     (if length proofs == 1 then id else indent) $ do
       prfs <- intercalate "\n" <$> mapM showProof proofs
       return $
         "[fac]" ++ prfs
-    
+
   showStep (Gen term var proof) = do
-    prf <- showProof proof 
+    prf <- showProof proof
     return $
       "[gen " ++ show term ++ " => " ++ show var ++ "]" ++ prf
-    
+
   showStep (Hyp hyp proof) = do
     prf <- showProof proof
     return $
       "[hyp " ++ show (hypId hyp) ++ "]" ++ prf
-    
+
   showStep (Hcn hyp proof) = do
     prf <- showProof proof
     return $
-      "[hcn " ++ show (hypId hyp) ++ "]" ++ prf 
-    
-  showStep (Csp term cses) = 
+      "[hcn " ++ show (hypId hyp) ++ "]" ++ prf
+
+  showStep (Csp term cses) =
     (if length cses == 1 then id else indent) $ do
       prfs <- intercalate "\n" <$> mapM (showProof . snd) cses
       return $
         "[cse " ++ show term ++ "]" ++ prfs
-      
+
   showStep (Icn term proof1 proof2) = indent $ do
     prf1 <- showProof proof1
     prf2 <- showProof proof2
     return $
       "[icn " ++ show term ++ "]" ++ prf1 ++ "\n" ++ prf2
-      
-  showStep (Ind var _ cses) = 
+
+  showStep (Ind var _ cses) =
     (if length cses == 1 then id else indent) $ do
       prfs <- intercalate "\n" <$> mapM (showProof . snd) cses
       return $
         "[ind " ++ show var ++ "]" ++ prfs
-    

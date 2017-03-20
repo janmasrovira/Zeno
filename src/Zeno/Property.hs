@@ -1,5 +1,5 @@
 module Zeno.Property (
-  PropertySet (..), Property, 
+  PropertySet (..), Property,
   ZProperty, ZPropertySet,
   PropertyCarrier (..),
   filterProperties,
@@ -23,20 +23,20 @@ type Property a = (String, Clause a)
 data PropertySet a
   = PropertySet { propsetProgram :: !(Program a),
                   propsetProperties :: ![Property a] }
-    
+
 class PropertyCarrier a where
   loadProperties :: Program a -> PropertySet a
-  
+
 instance PropertyCarrier ZVar where
   loadProperties pgm = PropertySet pgm' props
     where
     removeBind name = stripModuleName name `elem` map fst props
     removeType name = name `elem` ["Zeno.Prop", "Zeno.Equals"]
-    
-    pgm' = flip execState pgm 
-      $ removeBindingsBy removeBind 
-        >> removeDataTypesBy removeType 
-    
+
+    pgm' = flip execState pgm
+      $ removeBindingsBy removeBind
+        >> removeDataTypesBy removeType
+
     props = id
       . sortWith fst
       . mapMaybe clausify
@@ -45,15 +45,13 @@ instance PropertyCarrier ZVar where
       $ pgm
 
 filterProperties :: (String -> Bool) -> PropertySet a -> PropertySet a
-filterProperties p (PropertySet pgm props) = 
+filterProperties p (PropertySet pgm props) =
   PropertySet pgm (filter p' props)
   where p' (n, _) = p n
-  
+
 instance Show a => Show (PropertySet a) where
   show (PropertySet _ props) =
     concatMap (("\n" ++) . showProperty) props
-    where 
-    showProperty (name, cls) = 
+    where
+    showProperty (name, cls) =
       name ++ " : \"" ++ show cls ++ "\""
-  
-

@@ -12,12 +12,12 @@ import qualified Data.Text as Text
 class Isabellable a where
   toIsabelle :: a -> Text
   toIsabelle = runIndented . toIsabelleI
-  
+
   toIsabelleI :: a -> Indented Text
   toIsabelleI = return . toIsabelle
-  
+
 quote :: Text -> Text
-quote txt 
+quote txt
   | any (`Text.isInfixOf` txt) [" ", "(", ")"] = "\"" ++ txt ++ "\""
   | otherwise = txt
 

@@ -17,14 +17,14 @@ import qualified Zeno.Proof as Proof
 import qualified Data.Set as Set
 import qualified Data.Map as Map
 
-{- 
+{-
 STUFF
 
 Convert this all to MaybeT and remove the case-of maybe code
 
-REMEMBER the filterConditions weirdness, 
+REMEMBER the filterConditions weirdness,
   needs to be removed, if only to shorten proofs
-  
+
 REMEMBER that reducing hypotheses loses proofs
 
 The "==" check for adding a Proof.Sim step in solve_reduce is a bit heavy perhaps
@@ -38,25 +38,25 @@ Command line option for randomSequence vs sequence
 Do things in phases?
   like after induction there is no generalisation?
   after splitting there is no induction?
-  
+
 Theory about removal of multiple linked induction hypotheses on application
 
 Theory about only adding a hypothesis one the "first" inductive step of a chain
   that is to say do not add a hypothesis if hypotheses already exist
-  
+
 Try merging case-splitting back into induction
-  
+
 just remember to apply function definitions whilst finding critical terms
-  
+
 Try iding each case-analysis and never use case-analysis to do induction on
   a child of a variable that was created with this analysis
-  
+
 Try "hypothesis can be proven from conditions of goal using the solver"
   rather than it can directly be inferred
 
-Should variable sources distinguish between case-split and induction generated ones? i.e. data VariableSource = CaseSplit [Id] | Induction [Id] 
-  
-sorted (sorted xs) === sorted xs 
+Should variable sources distinguish between case-split and induction generated ones? i.e. data VariableSource = CaseSplit [Id] | Induction [Id]
+
+sorted (sorted xs) === sorted xs
   same as: sorted ys === ys :- P(ys) ... what is P??
     discovery of predicates
 -}
@@ -71,7 +71,7 @@ instance IdCounter SolverState where
     where
     (id, pgm') = newId (sProgram ss)
     ss' = ss { sProgram = pgm' }
-    
+
   largestId = largestId . sProgram
 
 instance WithinTraversable ZExpr SolverState where
@@ -79,7 +79,7 @@ instance WithinTraversable ZExpr SolverState where
     goal' <- mapWithinM f (sGoal s)
     hyps' <- mapM (mapWithinM f) (sHypotheses s)
     return $ s { sGoal = goal', sHypotheses = hyps' }
-    
+
 type Solver = Reader SolverState
 type StatefulSolver = State SolverState
 
@@ -104,13 +104,13 @@ solve pgm lemma =
     $ solve_all
 
 solve_all :: Solver (Maybe ZProof)
-solve_all = id 
+solve_all = id
          -- $ solve_apply
           . solve_reduce
           . traceGoal "goal"
-          $ combine [ 
+          $ combine [
                    --   solve_con,
-                       
+
                       solve_fac,
                       solve_gen,
                       solve_hyp,
@@ -118,7 +118,7 @@ solve_all = id
                       solve_ind,
                       solve_cse,
                       solve_filter,
-                      
+
                       return Nothing ]
 
 -- |This step applies any variable assignments in the goal conditions
@@ -133,20 +133,20 @@ solve_apply next_step = do
       mapM (proofstep . Proof.Sim) maybe_proof
   where
   applyVarAssignments :: [ZEquality] -> ZClause -> ZClause
-  applyVarAssignments = foldl' apply id 
+  applyVarAssignments = foldl' apply id
     where
-    apply fun c@(l@(Var var) :=: r) 
+    apply fun c@(l@(Var var) :=: r)
       | isUniversalVar var = id
-        . substituteTakingSources (Map.singleton l r) 
+        . substituteTakingSources (Map.singleton l r)
         . removeCondition c
         . fun
     apply fun c@(l :=: r@(Var var))
       | isUniversalVar var = id
-          . substituteTakingSources (Map.singleton r l) 
+          . substituteTakingSources (Map.singleton r l)
           . removeCondition c
           . fun
     apply fun _ = fun
-  
+
 solve_filter :: Solver (Maybe ZProof)
 solve_filter = do
   Clause eq conds <- asks sGoal
@@ -161,9 +161,9 @@ solve_filter = do
   if length conds == length conds'
     then return Nothing
     else do
-      proof <- localGoal (Clause eq conds') solve_all 
+      proof <- localGoal (Clause eq conds') solve_all
       mapM (proofstep . Proof.Sim) proof
-      
+
 -- Had to essentially reimplement the Reducible ZClause instance here
 -- since I had no nice way of detecting which type of proof
 -- was used, i.e. Con or Eql.
@@ -179,23 +179,23 @@ solve_reduce next_step = do
                 ReducedToFalse -> [Clause eq new_conds]
                 ReducedTo new_eqs ->
                   map (flip Clause new_conds) new_eqs
-          proofs <- forM new_goals (flip localGoal next_step) 
+          proofs <- forM new_goals (flip localGoal next_step)
           forM (conjoin proofs) $ \proofs -> do
             proof <- wrapProof proofs
             if new_goals == [goal] || proofStep proof == Proof.Eql
               then return proof
               else proofstep (Proof.Sim proof)
-  where 
+  where
   wrapProof :: [ZProof] -> Solver ZProof
   wrapProof [] = proofstep Proof.Eql
   wrapProof [proof] = return proof
   wrapProof proofs = proofstep (Proof.Fac proofs)
-                
+
 solve_con :: Solver (Maybe ZProof)
 solve_con = do
   conds <- asks (clauseConditions . sGoal)
   contr <- contradictory conds
-  if contr 
+  if contr
     then Just <$> proofstep Proof.Con
     else return Nothing
 
@@ -210,12 +210,12 @@ solve_fac = do
     else do
       let factor_goals = map pairToEquality (l_args `zip` r_args)
       factor_proofs <- forM factor_goals $
-            \eq -> localGoalEquality eq 
+            \eq -> localGoalEquality eq
                       . clearHypotheses
                       . tryToFalsifyGoal
                       $ solve_all
       mapM (proofstep . Proof.Fac) (conjoin factor_proofs)
-        
+
 solve_hyp :: Solver (Maybe ZProof)
 solve_hyp = do
   hyp_proofs <- concat <$> applyHypotheses maybeApplyHyp
@@ -239,9 +239,9 @@ solve_hyp = do
   findApplications :: ZExpr -> ZQuantified -> [(ZExprSubstitution, ZExpr)]
   findApplications goal_expr
       (Quantified vars (Clause (from_hyp :=: to_hyp) [])) =
-    map (id &&& applySubstitution) 
+    map (id &&& applySubstitution)
       . nubOrd
-      . filter (completeSubstitution vars) 
+      . filter (completeSubstitution vars)
       $ allUnifiers from_hyp goal_expr
     where
     applySubstitution :: ZExprSubstitution -> ZExpr
@@ -250,7 +250,7 @@ solve_hyp = do
       hyp_sub = Map.singleton from_hyp' to_hyp'
       from_hyp' = substituteTakingSources sub from_hyp
       to_hyp' = substituteTakingSources sub to_hyp
-   
+
 solve_ind :: Solver (Maybe ZProof)
 solve_ind = do
   crits <- id
@@ -266,7 +266,7 @@ solve_ind = do
   inductiveCriticalTerm :: CriticalTerm -> Bool
   inductiveCriticalTerm (term, _) =
     isVar term && isUniversalVar (fromVar term)
-    
+
   goInductive :: CriticalTerm -> Solver (Maybe ZProof)
   goInductive cterm@(ind_term@(Var ind_var), _) = do
     goal <- asks sGoal
@@ -282,11 +282,11 @@ solve_ind = do
     where
     ty_fun = head . flattenAppType . getType $ ind_term
     cons_s = instantiateConstructors cterm
-  goInductive cterm = error $ 
+  goInductive cterm = error $
     "Invalid critical term for induction " ++ show cterm
     ++ "\nThis is a bug!"
 
-  goInductive' :: ZVar -> [ZVar] -> ConstructorInstance -> Solver (Maybe ZProof) 
+  goInductive' :: ZVar -> [ZVar] -> ConstructorInstance -> Solver (Maybe ZProof)
   goInductive' ind_var forall (new_term, ind_vars) = do
     goal <- asks sGoal
     hyps <- asks sHypotheses
@@ -294,28 +294,28 @@ solve_ind = do
         createHyp rec_var = Hypothesis rec_var [(ind_var, Var rec_var)]
                           $ Quantified forall hyp
           where hyp = replace ind_var rec_var goal
-          
+
         groundHypothesis :: ZHypothesis -> [ZHypothesis]
-        groundHypothesis hyp@(Hypothesis hyp_id hyp_binds 
+        groundHypothesis hyp@(Hypothesis hyp_id hyp_binds
                                (Quantified vars cls))
           | not (ind_var `elem` vars) = [hyp]
           | otherwise = map generateHyp (new_term : map Var ind_vars)
           where
           new_vars = filter (/= ind_var) vars
-          
+
           generateHyp :: ZTerm -> ZHypothesis
-          generateHyp new_term = Hypothesis hyp_id new_binds 
+          generateHyp new_term = Hypothesis hyp_id new_binds
                                $ Quantified new_vars new_cls
             where
             new_binds = (ind_var, new_term) : hyp_binds
             subst = Map.singleton (Var ind_var) new_term
-            new_cls = substituteTakingSources subst cls 
+            new_cls = substituteTakingSources subst cls
 
     let subst = Map.singleton (Var ind_var) new_term
         new_goal = substituteTakingSources subst goal
         new_hyps = concatMap groundHypothesis hyps
         created_hyps = map createHyp ind_vars
-    
+
     local (\s -> s { sGoal = new_goal })
       . local (\s -> s { sHypotheses = created_hyps ++ new_hyps })
       $ solve_all
@@ -329,7 +329,7 @@ solve_cse = do
     Nothing -> return Nothing
     Just split -> goSplit split
   where
-  provenPath :: ZTerm -> ZTerm -> Solver (Maybe (ZTerm, ZProof)) 
+  provenPath :: ZTerm -> ZTerm -> Solver (Maybe (ZTerm, ZProof))
   provenPath term kterm
     | isApp kterm = return Nothing
     | otherwise = do
@@ -354,7 +354,7 @@ solve_cse = do
             proofstep (Proof.Csp term (kterms `zip` proofs))
         [(kterm, proof1)] -> do
           maybe_proof2 <- goSplit' kterm
-          forM maybe_proof2 $ \proof2 -> 
+          forM maybe_proof2 $ \proof2 ->
             proofstep (Proof.Icn (term :=: kterm) proof1 proof2)
         _ ->
           -- TODO This indicates a contradiction,
@@ -362,9 +362,9 @@ solve_cse = do
           return Nothing
     where
     goSplit' :: ZTerm -> Solver (Maybe ZProof)
-    goSplit' kterm = 
+    goSplit' kterm =
       localAddGoalCondition (term :=: kterm) solve_all
-    
+
 solve_gen :: Solver (Maybe ZProof)
 solve_gen = do
   inds <- id
@@ -378,25 +378,25 @@ solve_gen = do
         $ exprList goal
       superterms = id
         . nubOrd
-        . concatMap (usableSuperterms subterms) 
-        $ inds 
+        . concatMap (usableSuperterms subterms)
+        $ inds
         -- (inds ++ cons)
   disjoin <$> mapM generalise superterms
-  where  
+  where
     usableSuperterms :: [ZTerm] -> ZTerm -> [ZTerm]
-    usableSuperterms all_terms sub_term = 
+    usableSuperterms all_terms sub_term =
       removeSupersets (filter superterm all_terms)
-      --removeSubterms all_duplicates                 
+      --removeSubterms all_duplicates
       where
         all_duplicates :: [ZTerm]
         all_duplicates = filter superterm (duplicates all_terms)
 
         superterm :: ZTerm -> Bool
-        superterm t = destructibleTerm t 
-                   && isApp t 
-                   && t `contains` sub_term 
+        superterm t = destructibleTerm t
+                   && isApp t
+                   && t `contains` sub_term
                    && fromMaybe False (isDefinedVar <$> termFunction t)
-  
+
 solve_hcn :: Solver (Maybe ZProof)
 solve_hcn = do
   hyp_proofs <- concat <$> applyHypotheses generaliseHyp
@@ -407,26 +407,26 @@ solve_hcn = do
                   (Quantified vars (Clause eq@(l_hyp :=: r_hyp) [])))
     | not (isConstructorTerm r_hyp) = return []
     | otherwise = do
-        goal_term <- equalityLeft <$> clauseEquality <$> sGoal <$> ask 
-        
+        goal_term <- equalityLeft <$> clauseEquality <$> sGoal <$> ask
+
         let possibleTerm :: ZTerm -> Bool
-            possibleTerm term 
-               = isApp term 
-              && isDefinedVar var 
-              && destructibleTerm term 
+            possibleTerm term
+               = isApp term
+              && isDefinedVar var
+              && destructibleTerm term
               && length (universalVariables term) == length vars + 1
               where
               Just var = termFunction term
 
         fmap catMaybes
-          . sequence 
+          . sequence
           $ do
             possible <- filter possibleTerm (strictlyWithinList l_hyp)
             uni <- allUnifiers possible goal_term
-            guard (completeSubstitution vars uni) 
+            guard (completeSubstitution vars uni)
             let eq' = substitute uni eq
                 genr = substitute uni possible
-            return 
+            return
               . fmap (fmap (hyp, ))
               $ localAddGoalCondition eq' (generalise genr)
 {-
@@ -438,10 +438,10 @@ randomSequence solvers = do
   where
     localRandom :: StdGen -> Solver a -> Solver a
     localRandom gen = local (\s -> s { sRandom = gen })
-        
+
     splitGens :: [Solver a] -> Solver [a]
     splitGens = foldl' splitGen (return [])
-      where 
+      where
         splitGen :: Solver [a] -> Solver a -> Solver [a]
         splitGen ss s = do
           random <- sRandom <$> ask
@@ -450,7 +450,7 @@ randomSequence solvers = do
           s' <- localRandom r1 s
           return (s' : ss')
 -}
-purifyGoal :: Solver a -> Solver a 
+purifyGoal :: Solver a -> Solver a
 purifyGoal solver = do
   goal <- asks sGoal
   purified <- purifyConditions goal
@@ -462,25 +462,25 @@ criticalTerms :: Bool -> Solver [CriticalTerm]
 criticalTerms check_superset = do
   Clause (goal_l :=: goal_r) conds <- asks sGoal
   let all_terms = goal_l : goal_r : concatMap exprList conds
-      filterer (term, _) 
-        = isVar term 
+      filterer (term, _)
+        = isVar term
         || not (any (flip contains term) all_terms)
-  return 
+  return
     . nubOrd
     . filter filterer
     . mapMaybe (criticalTerm check_superset)
     $ all_terms
-  where 
+  where
   criticalTerm :: Bool -> ZTerm -> Maybe CriticalTerm
   criticalTerm check_superset expr = do
     cterm@(term, src) <- id
-      . runWriterT 
+      . runWriterT
       . critical
       . evaluateToCase
       $ expr
     guard (not $ null src)
     guard (destructibleTerm term)
-    guard (not check_superset 
+    guard (not check_superset
       || all (not . orderedSupersetOf src) (allSources term))
     return cterm
     where
@@ -501,12 +501,12 @@ generalise term =
   stateful newIdS $ \new_id -> do
     goal <- asks sGoal
     let new_var = ZVar new_id Nothing (getType term) defaultVarClass
-    maybe_proof <- id 
+    maybe_proof <- id
       . local (substituteTakingSources (Map.singleton term (Var new_var)))
       . tryToFalsifyGoal
       . clearHypotheses
       $ solve_all
-    forM maybe_proof $ \proof -> 
+    forM maybe_proof $ \proof ->
       proofstep (Proof.Gen term new_var proof)
 
 applyHypotheses :: forall a . (ZHypothesis -> Solver a) -> Solver [a]
@@ -534,71 +534,71 @@ applyHypotheses apply = do
 
   applicable :: ZHypothesis -> Solver [ZHypothesis]
   applicable hyp@(Hypothesis _ _ (Quantified _ (Clause _ []))) = return [hyp]
-  applicable (Hypothesis hyp_id hyp_binds 
+  applicable (Hypothesis hyp_id hyp_binds
                 (Quantified c_vars (Clause c_eq c_conds))) = do
     possible_subs <- mapM removeCondition c_conds
-    return 
-      . map applySub 
-      . mergeUnifiers 
+    return
+      . map applySub
+      . mergeUnifiers
       . map (mconcat . map Unifier)
       $ sequence possible_subs
     where
     applySub :: ZExprSubstitution -> ZHypothesis
-    applySub sub = Hypothesis hyp_id new_binds 
+    applySub sub = Hypothesis hyp_id new_binds
                  $ Quantified c_vars' (Clause c_eq' [])
-      where 
+      where
       vars = map fromVar (Map.keys sub)
       c_vars' = filter (not . flip elem vars) c_vars
       c_eq' = substitute sub c_eq
       new_binds = hyp_binds ++ map (first fromVar) (Map.toList sub)
-    
+
     validSubstitution :: ZExprSubstitution -> Bool
     validSubstitution = all (flip elem (map Var c_vars)) . Map.keys
 
     removeCondition :: ZEquality -> Solver [ZExprSubstitution]
     removeCondition eq@(c_l :=: c_r) = do
       g_conds <- clauseConditions <$> asks sGoal
-      return 
+      return
         . filter validSubstitution
-        . mergeUnifiers 
-        . flip map g_conds 
+        . mergeUnifiers
+        . flip map g_conds
         $ \(g_l :=: g_r) ->
           let uni_l = unify c_l g_l
               uni_r = unify c_r g_r
           in uni_l `mappend` uni_r
-          
+
 completeSubstitution :: Ord a => [a] -> ExprSubstitution a -> Bool
-completeSubstitution vars sub = 
+completeSubstitution vars sub =
   Set.fromList (map Var vars) == Map.keysSet sub
 
 localGoal :: ZClause -> Solver a -> Solver a
 localGoal goal = local $ \s -> s { sGoal = goal }
 
 localAddGoalCondition :: ZEquality -> Solver a -> Solver a
-localAddGoalCondition eq = local $ \s -> s 
+localAddGoalCondition eq = local $ \s -> s
   { sGoal = addCondition eq (sGoal s) }
-          
+
 localGoalEquality :: ZEquality -> Solver a -> Solver a
-localGoalEquality eq = local $ \s -> s 
+localGoalEquality eq = local $ \s -> s
   { sGoal = (sGoal s) { clauseEquality = eq } }
 
 localGoalConditions :: [ZEquality] -> Solver a -> Solver a
 localGoalConditions conds = local $ \s -> s
   { sGoal = (sGoal s) { clauseConditions = conds } }
-          
+
 combine :: [Solver (Maybe ZProof)] -> Solver (Maybe ZProof)
-combine = fmap disjoin . sequence 
+combine = fmap disjoin . sequence
 
 proofstep :: ZProofStep -> Solver ZProof
 proofstep step = do
   goal <- asks sGoal
   hyps <- asks sHypotheses
   return (Proof step goal hyps)
-  
+
 clearGoalSources :: Solver a -> Solver a
 clearGoalSources = local $ \s ->
   s { sGoal = clearSources (sGoal s) }
-  
+
 clearHypotheses :: Solver a -> Solver a
 clearHypotheses = local $ \s -> s { sHypotheses = mempty }
 
@@ -609,14 +609,13 @@ tryToFalsifyGoal next_step = do
   if false then return Nothing else next_step
 
 traceGoal :: String -> Solver (Maybe a) -> Solver (Maybe a)
-traceGoal tag solver 
+traceGoal tag solver
   | not debugSolver = solver
   | otherwise = do
     goal <- asks sGoal
     hyps <- asks sHypotheses
-    let hyps_s = if null hyps 
-          then "" 
+    let hyps_s = if null hyps
+          then ""
           else "\nwith\n" ++ (intercalate "\n" $ map show hyps)
     flip local solver $
       trace (tag ++ ":\n" ++ show goal ++ hyps_s)
-      

@@ -14,14 +14,14 @@ data DataType a
                   dataTypeName :: !String,
                   dataTypeArgs :: ![PolyTypeVar],
                   dataTypeCons :: ![a] }
-  deriving ( Functor, Foldable, Traversable ) 
+  deriving ( Functor, Foldable, Traversable )
 
 instance Show (DataType a) where
   show = stripModuleName . dataTypeName
-  
+
 instance Eq (DataType a) where
   (==) = (==) `on` dataTypeId
-  
+
 instance Ord (DataType a) where
   compare = compare `on` dataTypeId
 
@@ -29,7 +29,5 @@ instance Ord (DataType a) where
 -- output its name.
 showDataType :: (Typed a, Show a, TypeVar a ~ DataType a) => DataType a -> String
 showDataType (DataType _ name args cons) =
-  "\ntype " ++ stripModuleName name ++ concatMap ((" " ++) . show) args ++ 
+  "\ntype " ++ stripModuleName name ++ concatMap ((" " ++) . show) args ++
   " where" ++ concatMap (("\n  " ++) . showTyped) cons ++ "\n"
-  
-

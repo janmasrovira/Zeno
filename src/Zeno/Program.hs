@@ -2,7 +2,7 @@
              DeriveFoldable, DeriveTraversable #-}
 module Zeno.Program (
   Program (..), emptyProgram,
-  addDataType, addBindings, 
+  addDataType, addBindings,
   removeBindingsBy, removeDataTypesBy
 ) where
 
@@ -23,14 +23,14 @@ data Program a
                   programCounter :: !Id,
                   programFlags :: !ZenoFlags }
   deriving ( Functor, Foldable, Traversable )
-                  
+
 instance IdCounter (Program a) where
-  newId pgm = 
+  newId pgm =
     let id = nextId (programCounter pgm)
     in (id, pgm { programCounter = id })
-    
+
   largestId = programCounter
-  
+
 emptyProgram :: ZenoFlags -> Program a
 emptyProgram flags
   = Program    { programBindings = mempty,
@@ -38,29 +38,29 @@ emptyProgram flags
                  programDataTypes = mempty,
                  programCounter = mempty,
                  programFlags = flags }
-                           
+
 addDataType :: MonadState (Program a) m => DataType a -> m ()
-addDataType dtype@(DataType _ name _ _) = modify $ \z -> z 
+addDataType dtype@(DataType _ name _ _) = modify $ \z -> z
   { programDataTypes = Map.insert name dtype (programDataTypes z) }
-  
+
 addBindings :: (Show a, MonadState (Program a) m) => Bindings a -> m ()
-addBindings binds = modify $ \z -> z 
-  { programBindings = (programBindings z) ++ [binds], 
+addBindings binds = modify $ \z -> z
+  { programBindings = (programBindings z) ++ [binds],
     programFunctions = insertAll flat (programFunctions z) }
   where
   flat = map (first show)
        $ flattenBindings binds
-  
+
   insertAll :: Ord k => [(k, v)] -> Map k v -> Map k v
   insertAll = flip (foldl' (flip (uncurry Map.insert)))
-  
-removeDataTypesBy :: (Show a, MonadState (Program a) m) => 
+
+removeDataTypesBy :: (Show a, MonadState (Program a) m) =>
    (String -> Bool) -> m ()
 removeDataTypesBy check = modify $ \z -> z
-  { programDataTypes = Map.filterWithKey (flip $ const (not . check)) 
+  { programDataTypes = Map.filterWithKey (flip $ const (not . check))
       (programDataTypes z) }
-  
-removeBindingsBy :: (Show a, MonadState (Program a) m) => 
+
+removeBindingsBy :: (Show a, MonadState (Program a) m) =>
     (String -> Bool) -> m ()
 removeBindingsBy check = modify $ \z -> z
   { programFunctions = Map.filterWithKey (flip $ const (not . check))

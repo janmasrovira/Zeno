@@ -19,9 +19,9 @@ otherwise = True
 
 data Equals
   = forall a . (:=:) a a
-  
+
 data Prop
-  = Given Equals Prop           
+  = Given Equals Prop
   | Prove Equals
 
 prove :: Equals -> Prop

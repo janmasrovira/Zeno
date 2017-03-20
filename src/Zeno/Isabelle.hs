@@ -18,38 +18,36 @@ import qualified Data.Map as Map
 import qualified Data.Text as Text
 
 instance Isabellable ZProofSet where
-  toIsabelle (ProofSet pgm named_proofs) = 
+  toIsabelle (ProofSet pgm named_proofs) =
     "theory Zeno\nimports Plain List\nbegin"
     ++ isa_dtypes ++ isa_binds ++ isa_proofs ++ "\n\nend\n"
     where
     flags = programFlags pgm
     (names, proofs) = unzip named_proofs
     names' = map convert names
-    
-    all_vars = 
+
+    all_vars =
       (nubOrd . concatMap (toList . proofGoal)) proofs
-      
+
     isa_proofs = foldl (++) mempty
                $ zipWith namedIsabelleProof names'  proofs
-      
+
     binds = sortBindings binds'
-    (dtypes, binds') 
-      | flagIsabelleAll flags = 
-          ( Map.elems . programDataTypes $ pgm, 
+    (dtypes, binds')
+      | flagIsabelleAll flags =
+          ( Map.elems . programDataTypes $ pgm,
             programBindings $ pgm )
-      | otherwise = 
+      | otherwise =
           dependencies pgm all_vars
-    
+
     builtInType dt = show dt `elem`
       ["list", "bool", "(,)", "(,,)", "(,,,)"]
-    
+
     isa_binds = foldl (++) mempty
-              . map toIsabelle 
+              . map toIsabelle
               $ binds
-    
+
     isa_dtypes = foldl (++) mempty
-               . map toIsabelle 
-               . filter (not . builtInType) 
+               . map toIsabelle
+               . filter (not . builtInType)
                $ dtypes
-
-

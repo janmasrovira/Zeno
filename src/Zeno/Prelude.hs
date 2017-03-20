@@ -30,7 +30,7 @@ module Zeno.Prelude
   module Data.Text,
   module Debug.Trace,
   module System.Random,
-  
+
   (++), concat, intercalate,
   concatMap, concatMapM, partitionM,
   fromJustT, anyM, allM, findM, sortWith
@@ -43,12 +43,12 @@ import Prelude hiding ( mapM, foldl, foldl1, mapM_, minimum, maximum, sequence_,
 
 import Control.Arrow ( (>>>), (<<<), (&&&), (***), first, second )
 import Control.Applicative
-import Control.Monad ( liftM, ap, replicateM, 
+import Control.Monad ( liftM, ap, replicateM,
   zipWithM, filterM, when, unless, guard, (>=>), MonadPlus (..) )
 import Control.Monad.Trans ( MonadTrans (..), lift, liftIO )
 import Control.Monad.State ( evalStateT, execState, runState, evalState,
   MonadState (..), State (..), StateT (..), modify, gets )
-import Control.Monad.Reader ( 
+import Control.Monad.Reader (
   MonadReader (..), Reader (..), ReaderT (..), asks, runReader )
 import Control.Monad.Writer ( execWriter, runWriter, execWriterT,
   MonadWriter (..), Writer (..), WriterT (..) )
@@ -95,19 +95,19 @@ concatMap :: Monoid m => (a -> m) -> [a] -> m
 concatMap f = concat . map f
 
 concatMapM :: (Monoid b, Monad m) => (a -> m b) -> [a] -> m b
-concatMapM f = liftM concat . mapM f 
+concatMapM f = liftM concat . mapM f
 
 intercalate :: Monoid m => m -> [m] -> m
 intercalate x = concat . intersperse x
 
 partitionM :: Monad m => (a -> m Bool) -> [a] -> m ([a], [a])
-partitionM f = foldrM f' ([], [])  
+partitionM f = foldrM f' ([], [])
   where
   f' a (xs, ys) = do
     p <- f a
     return $
       if p then (a : xs, ys) else (xs, a : ys)
-      
+
 fromJustT :: Monad m => MaybeT m a -> m a
 fromJustT = liftM fromJust . runMaybeT
 
@@ -124,10 +124,9 @@ findM p (x:xs) = do
   if found
     then return (Just x)
     else findM p xs
-    
+
 sortWith :: Ord b => (a -> b) -> [a] -> [a]
 sortWith f = sortBy (compare `on` f)
 
 instance Functor First where
   fmap f = First . fmap f . getFirst
-

@@ -1,7 +1,7 @@
 module Zeno.Traversing (
   WithinTraversable (..), Substitution,
   mapWithin, substitute,
-  replaceWithin, replaceManyWithin, 
+  replaceWithin, replaceManyWithin,
   withinList, strictlyWithinList,
   contains, containsStrictly,
   removeSupersets, removeSubsets,
@@ -24,17 +24,17 @@ showSubstitution (Map.toList -> subs) =
 
 class WithinTraversable t f where
   mapWithinM :: Monad m => (t -> m t) -> f -> m f
-  
+
 instance Traversable f => WithinTraversable a (f a) where
   mapWithinM = mapM
-  
-substitute :: (WithinTraversable a f, Eq a) => 
+
+substitute :: (WithinTraversable a f, Eq a) =>
   Substitution a a -> f -> f
 substitute map = replaceManyWithin (Map.toList map)
 
 isOneToOne :: Ord b => Substitution a b -> Bool
 isOneToOne = not . containsDuplicates . Map.elems
-  
+
 mapWithin :: WithinTraversable t f => (t -> t) -> f -> f
 mapWithin = mapM_to_fmap mapWithinM
 
@@ -48,7 +48,7 @@ anyWithin p = getAny . execWriter . mapWithinM tellAny
 replaceWithin :: (WithinTraversable t f, Eq t) => t -> t -> f -> f
 replaceWithin = genericReplace mapWithin
 
-replaceManyWithin :: (Foldable f, WithinTraversable a t, Eq a) => 
+replaceManyWithin :: (Foldable f, WithinTraversable a t, Eq a) =>
   f (a, a) -> t -> t
 replaceManyWithin = genericReplaceMany mapWithin
 
@@ -71,4 +71,3 @@ removeSubsets sets = filter (not . isSubset) sets
 removeSupersets :: (WithinTraversable a a, Eq a) => [a] -> [a]
 removeSupersets sets = filter (not . isSuperset) sets
   where isSuperset set = any (containsStrictly set) sets
-  
