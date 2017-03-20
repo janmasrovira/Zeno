@@ -208,7 +208,7 @@ addBuiltInTypes = do
     addEnvType (Left "GHC.Prim.State#") any_type
     addEnvType (Left "GHC.Prim.RealWorld") any_type
     addEnvVar (Left "GHC.Prim.realWorld#") rw_var
-    addEnvVar (Left "Control.Exception.Base.patError") fun_var
+    addEnvVar (Left "patError") fun_var
 
 addEnvVar :: Either String Hs.Var -> ZVar -> HsZeno ()
 addEnvVar var zvar = modify $ \env ->
