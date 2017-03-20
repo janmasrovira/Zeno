@@ -122,7 +122,7 @@ summaryToModule = Hs.parseModule
 simplifyModule :: Hs.ModGuts -> Hs.Ghc Hs.CoreModule
 simplifyModule guts = do
   hsc_env <- Hs.getSession
-  simpl_guts <- Hs.hscSimplify guts
+  simpl_guts <- liftIO $ Hs.hscSimplify hsc_env guts
   (cg, md) <- liftIO $ Hs.tidyProgram hsc_env simpl_guts
   return $ Hs.CoreModule
     { Hs.cm_module = Hs.cg_module cg,
@@ -217,7 +217,7 @@ addEnvType type_name ztype = modify $ \env ->
   env { envTypes = Map.insert type_name ztype (envTypes env) }
 
 output :: Outputable a => a -> String
-output = showPpr --show . flip ppr defaultUserStyle
+output = showPpr Hs.unsafeGlobalDynFlags --show . flip ppr defaultUserStyle
 
 outputName :: Outputable a => a -> String
 outputName = output --stripEndNumber . stripModuleName . output
