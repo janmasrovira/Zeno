@@ -123,10 +123,12 @@ simplifyModule :: Hs.ModGuts -> Hs.Ghc Hs.CoreModule
 simplifyModule guts = do
   hsc_env <- Hs.getSession
   simpl_guts <- Hs.hscSimplify guts
-  (cg, md) <- Hs.liftIO $ Hs.tidyProgram hsc_env simpl_guts
+  (cg, md) <- liftIO $ Hs.tidyProgram hsc_env simpl_guts
   return $ Hs.CoreModule
-    { Hs.cm_module = Hs.cg_module cg,    Hs.cm_types = Hs.md_types md,
-      Hs.cm_imports = Hs.cg_dir_imps cg, Hs.cm_binds = Hs.cg_binds cg }
+    { Hs.cm_module = Hs.cg_module cg,
+      Hs.cm_types = Hs.md_types md,
+      -- Hs.cm_imports = Hs.cg_dir_imps cg,
+      Hs.cm_binds = Hs.cg_binds cg }
 
 loadModule :: Hs.CoreModule -> HsZeno ()
 loadModule core_mod = {- trace (output . Hs.cm_binds $ core_mod) $ -} do
