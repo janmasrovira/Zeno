@@ -45,7 +45,7 @@ applyUnification :: (WithinTraversable a f, Eq a) =>
 applyUnification NoUnifier = id
 applyUnification (Unifier sub) = substitute sub
 
-allUnifiers :: (Unifiable a, WithinTraversable a f, Eq a) =>
+allUnifiers :: (Unifiable a, WithinTraversable a f, Eq a, Ord (Names a)) =>
   a -> f -> [Substitution (Names a) a]
 allUnifiers from = mergeUnifiers . execWriter . (mapWithinM unifiers)
   where unifiers to = tell [unify from to] >> return to
