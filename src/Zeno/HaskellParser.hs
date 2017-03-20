@@ -61,8 +61,8 @@ instance WithinTraversable (Hs.Expr a) (Hs.Expr a) where
     f =<< Hs.Lam x `liftM` mapWithinM f expr
   mapWithinM f (Hs.Cast expr coer) =
     f =<< (flip Hs.Cast coer) `liftM` mapWithinM f expr
-  mapWithinM f (Hs.Note note expr) =
-    f =<< Hs.Note note `liftM` mapWithinM f expr
+  -- mapWithinM f (Hs.Note note expr) =
+  --   f =<< Hs.Note note `liftM` mapWithinM f expr
   mapWithinM f (Hs.Case expr b t alts) =
     f =<< Hs.Case `liftM` mapWithinM f expr `ap`
       return b `ap` return t `ap` mapM traverseAlt alts
@@ -411,7 +411,7 @@ createHsEnvVar hs_var var_cls = do
   return new_var
 
 convertExpr :: HsExpr -> HsZeno ZExpr
-convertExpr (Hs.Note _ rhs) = convertExpr rhs
+-- convertExpr (Hs.Note _ rhs) = convertExpr rhs
 convertExpr (Hs.Var hsvar) = do
   var <- lookupVar hsvar
   return $ case varClass var of
