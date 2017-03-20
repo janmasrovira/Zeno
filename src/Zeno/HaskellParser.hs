@@ -110,8 +110,8 @@ loadHaskell zflags = do
     Hs.setSessionDynFlags flags'
 
   runGhc :: Hs.Ghc a -> IO a
-  runGhc = Hs.defaultErrorHandler Hs.defaultDynFlags
-         . Hs.runGhc (Just Paths.libdir)
+  runGhc = -- Hs.defaultErrorHandler Hs.defaultDynFlags .
+         Hs.runGhc (Just Paths.libdir)
 
 summaryToModule :: Hs.ModSummary -> Hs.Ghc Hs.ModGuts
 summaryToModule = Hs.parseModule
