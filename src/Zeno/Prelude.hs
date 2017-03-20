@@ -60,7 +60,7 @@ import Control.Exception ( assert )
 
 import Data.Maybe
 import Data.Either ( lefts, rights, partitionEithers )
-import Data.Monoid
+import Data.Monoid ( Any (..), getAny, Endo (..), appEndo, First (..), getFirst )
 import Data.Map ( Map )
 import Data.Set ( Set )
 import Data.IntSet ( IntSet )
