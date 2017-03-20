@@ -128,5 +128,5 @@ findM p (x:xs) = do
 sortWith :: Ord b => (a -> b) -> [a] -> [a]
 sortWith f = sortBy (compare `on` f)
 
-instance Functor First where
-  fmap f = First . fmap f . getFirst
+-- instance Functor First where
+--   fmap f = First . fmap f . getFirst
