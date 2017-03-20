@@ -17,4 +17,4 @@ $ cabal configure
 $ runhaskell Setup build
 ```
 
-And there you go, now you can see the errors... :-D
+And there you go, if everything works as expected, it should build properly... :-D
