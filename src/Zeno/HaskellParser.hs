@@ -157,9 +157,9 @@ addBuiltInTypes = do
           bool_type (ConstructorVar False)
         bool_dtype = DataType bool_id "bool" [] [true_var, false_var]
         bool_type = VarType bool_dtype
-    addEnvVar  (Left "GHC.Bool.True")  true_var
-    addEnvVar  (Left "GHC.Bool.False") false_var
-    addEnvType (Left "GHC.Bool.Bool") bool_type
+    addEnvVar  (Left "True")  true_var
+    addEnvVar  (Left "False") false_var
+    addEnvType (Left "Bool") bool_type
     lift $ addDataType bool_dtype
 
   addListType :: HsZeno ()
@@ -174,8 +174,8 @@ addBuiltInTypes = do
         list_dtype = DataType list_id "list" [poly_id] [empty_var, cons_var]
         empty_var = ZVar empty_id (Just "[]") empty_type (ConstructorVar False)
         cons_var = ZVar cons_id (Just ":") cons_type (ConstructorVar True)
-    addEnvVar  (Left "GHC.Types.[]") empty_var
-    addEnvVar  (Left "GHC.Types.:")  cons_var
+    addEnvVar  (Left "[]") empty_var
+    addEnvVar  (Left ":")  cons_var
     addEnvType (Left "[]") list_type_fun
     lift $ addDataType list_dtype
 
