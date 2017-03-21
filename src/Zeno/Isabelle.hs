@@ -19,7 +19,7 @@ import qualified Data.Text as Text
 
 instance Isabellable ZProofSet where
   toIsabelle (ProofSet pgm named_proofs) =
-    "theory Zeno\nimports Plain List\nbegin"
+    "theory Zeno\nimports Main List\nbegin"
     ++ isa_dtypes ++ isa_binds ++ isa_proofs ++ "\n\nend\n"
     where
     flags = programFlags pgm

@@ -95,7 +95,7 @@ zeno (PropertySet !pgm !props') = zenoTimeout $ do
       putStr "\nChecking with Isabelle... "
       hFlush stdout
       (exitcode, isa_out, isa_err) <-
-        readProcessWithExitCode "isabelle" ["usedir", "HOL", output_dir] ""
+        readProcessWithExitCode "isabelle" ["build", "-D", output_dir] ""
       case exitcode of
         ExitSuccess -> putStr "Done."
         ExitFailure _ -> printf "Failed.%s" isa_err
@@ -124,8 +124,11 @@ zeno (PropertySet !pgm !props') = zenoTimeout $ do
   matches = flagMatchWith flags
 
   output_dir = flagIsabelleDir flags
-  ml_code = "use_thys [\"Zeno\"]"
-  ml_path = output_dir ++ "/ROOT.ML"
+  ml_code = "session \"isa\" = \"HOL\" +\n" ++
+            "  options [document = false]\n" ++
+            "  theories\n" ++
+            "    Zeno"
+  ml_path = output_dir ++ "/ROOT"
   proofs_path = output_dir ++ "/Zeno.thy"
   proofs_code = toIsabelle proofset
 
