@@ -65,6 +65,7 @@ flattenAppType t = [t]
 
 fromVarType :: Type a -> a
 fromVarType (VarType x) = x
+fromVarType _ = error "incomplete pattern"
 
 isPolyVarType :: Type a -> Bool
 isPolyVarType (PolyVarType {}) = True
@@ -72,6 +73,7 @@ isPolyVarType _ = False
 
 fromPolyVarType :: Type a -> PolyTypeVar
 fromPolyVarType (PolyVarType var) = var
+fromPolyVarType _ = error "incomplete pattern"
 
 isFunType :: Type a -> Bool
 isFunType (FunType {}) = True

@@ -145,6 +145,7 @@ isLam _ = False
 
 fromVar :: Expr a -> a
 fromVar (Var v) = v
+fromVar _ = error "incomplete pattern"
 
 flattenApp :: Expr a -> [Expr a]
 flattenApp (App lhs rhs) = flattenApp lhs ++ [rhs]

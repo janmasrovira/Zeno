@@ -250,6 +250,7 @@ solve_hyp = do
       hyp_sub = Map.singleton from_hyp' to_hyp'
       from_hyp' = substituteTakingSources sub from_hyp
       to_hyp' = substituteTakingSources sub to_hyp
+  findApplications _ _ = error "incomplete pattern"
 
 solve_ind :: Solver (Maybe ZProof)
 solve_ind = do
@@ -429,6 +430,7 @@ solve_hcn = do
             return
               . fmap (fmap (hyp, ))
               $ localAddGoalCondition eq' (generalise genr)
+  generaliseHyp _ = error "incomplete pattern"
 {-
 randomSequence :: [Solver a] -> Solver [a]
 randomSequence solvers = do

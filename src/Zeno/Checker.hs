@@ -45,9 +45,6 @@ usableCritical (term, src) =
 falsifiable :: (IdCounter c, MonadReader c m) => ZClause -> m Bool
 falsifiable = liftM isJust . falsify
 
-showCounterexample :: Maybe ZExprSubstitution -> String
-showCounterexample Nothing = "None"
-
 -- |Attempts to find a counter-example to a given property.
 falsify :: (IdCounter c, MonadReader c m) => ZClause -> m (Maybe ZExprSubstitution)
 falsify cls = do

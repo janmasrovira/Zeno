@@ -31,6 +31,7 @@ updateDefinedVar rc' expr var =
   case varClass var of
     DefinedVar _ rc ->
       var { varClass = DefinedVar (Just expr) (fromMaybe rc rc') }
+    _ -> error "incomplete pattern"
 
 replaceAllVars :: Functor f => [ZVar] -> f ZVar -> f ZVar
 replaceAllVars vars = replaceMany (vars `zip` vars)

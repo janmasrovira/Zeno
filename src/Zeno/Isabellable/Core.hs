@@ -131,6 +131,7 @@ instance Isabellable ZExpr where
         return $
           i ++ "(let " ++ toIsabelle var ++ " = " ++ expr'
           ++ i ++ "in " ++ rhs' ++ ")"
+      _ -> error "incomplete pattern"
   toIsabelleI (Cse _ expr alts) = indent $ do
     expr' <- toIsabelleI expr
     alts' <- mapM toIsabelleI alts

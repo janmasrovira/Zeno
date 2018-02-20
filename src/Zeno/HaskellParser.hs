@@ -476,6 +476,8 @@ convertExpr (Hs.Case of_expr var _ alts) = do
     z_binds  <- mapM (flip createHsEnvVar defaultVarClass) binds
     z_rhs <- convertExpr rhs
     return $ Alt z_con z_binds z_rhs
+  convertAlt _ = error "incomplete pattern"
+convertExpr _ = error "incomplete pattern"
 
 convertDataCons :: [Hs.DataCon] -> HsZeno ()
 convertDataCons cons = do
