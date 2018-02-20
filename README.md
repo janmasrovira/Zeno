@@ -10,10 +10,10 @@ Updated to work with GHC-8.2 and stack.
 
 ## Instructions
 ```sh
-$ git clone https://github.com/janmasrovira/Zeno.git
-$ cd Zeno
-$ stack setup
-$ stack build
-$ stack exec zeno
+git clone https://github.com/janmasrovira/Zeno.git
+cd Zeno
+stack setup
+stack build
+stack exec zeno
 ```
 Then follow the printed instructions.
