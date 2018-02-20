@@ -8,8 +8,7 @@ Updated to work with GHC-8.2 and stack.
 
 * http://pubs.doc.ic.ac.uk/zenoTwo/
 
-## Instruction
-1) To run it just do:
+## Instructions
 ```sh
 $ git clone https://github.com/janmasrovira/Zeno.git
 $ cd Zeno
