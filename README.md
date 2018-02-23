@@ -1,7 +1,7 @@
 # Zeno
 Unofficial Zeno fork.
 
-Updated to work with GHC-8.2 and stack.
+Updated to work with GHC-7.10.3 and stack.
 
 ## Links
 * https://wiki.haskell.org/Zeno
@@ -12,7 +12,6 @@ Updated to work with GHC-8.2 and stack.
 ```sh
 git clone https://github.com/janmasrovira/Zeno.git
 cd Zeno
-stack setup
 stack build
 stack exec zeno
 ```
